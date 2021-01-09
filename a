@@ -1,0 +1,176 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+df=pd.read_csv('Data/income_evaluation.csv')
+df.head()
+
+df.shape
+
+df.info()
+
+for x in df.columns:
+    #убирает \n,\t
+    x_new=x.strip()
+    df=df.rename(columns={x:x_new})
+df.columns
+
+data=df.drop(['fnlwgt','capital-gain','capital-loss','native-country',],axis=1)
+data
+
+for column in data[['workclass','education','marital-status','occupation','race', 'sex']]:
+    data[column]=data[column].str.strip()
+data.head()
+
+from sklearn import preprocessing
+
+print('workclass - ',data['workclass'].unique())
+wcl_titles=data['workclass'].unique()
+
+print('education - ',data['education'].unique())
+educ_titles=data['education'].unique()
+print('education-num - ',data['education-num'].unique())
+print('marital-status - ',data['marital-status'].unique())
+mst_titles=data['marital-status'].unique()
+print('occupation - ',data['occupation'].unique())
+occ_titles=data['occupation'].unique()
+print('relationship - ',data['relationship'].unique())
+rel_titles=data['relationship'].unique()
+print('race - ',data['race'].unique())
+race_titles=data['race'].unique()
+print('hours-per-week - ',data['hours-per-week'].unique())
+hpw_titles=data['hours-per-week'].unique()
+sex_titles=data['sex'].unique()
+
+lb_workclass = preprocessing.LabelEncoder()
+lb_workclass.fit(['State-gov', 'Self-emp-not-inc', 'Private', 'Federal-gov', 'Local-gov', '?',
+ 'Self-emp-inc', 'Without-pay', 'Never-worked'])
+data.iloc[:,1]=lb_workclass.transform(data.iloc[:,1])
+
+lb_educ = preprocessing.LabelEncoder()
+lb_educ.fit(['Bachelors', 'HS-grad', '11th', 'Masters', '9th', 'Some-college', 'Assoc-acdm',
+ 'Assoc-voc', '7th-8th', 'Doctorate', 'Prof-school', '5th-6th', '10th',
+ '1st-4th', 'Preschool', '12th'])
+data.iloc[:,2]=lb_educ.transform(data.iloc[:,2])
+
+lb_marital = preprocessing.LabelEncoder()
+lb_marital.fit(['Never-married', 'Married-civ-spouse', 'Divorced', 'Married-spouse-absent',
+ 'Separated', 'Married-AF-spouse', 'Widowed'])
+data.iloc[:,4]=lb_marital.transform(data.iloc[:,4])
+
+lb_occup = preprocessing.LabelEncoder()
+lb_occup.fit(['Adm-clerical', 'Exec-managerial', 'Handlers-cleaners', 'Prof-specialty',
+ 'Other-service', 'Sales', 'Craft-repair', 'Transport-moving',
+ 'Farming-fishing', 'Machine-op-inspct', 'Tech-support', '?',
+ 'Protective-serv', 'Armed-Forces', 'Priv-house-serv'])
+data.iloc[:,5]=lb_occup.transform(data.iloc[:,5])
+
+lb_rel = preprocessing.LabelEncoder()
+lb_rel.fit([' Not-in-family', ' Husband', ' Wife', ' Own-child', ' Unmarried',
+ ' Other-relative'])
+data.iloc[:,6]=lb_rel.transform(data.iloc[:,6])
+
+lb_race = preprocessing.LabelEncoder()
+lb_race.fit(['White', 'Black', 'Asian-Pac-Islander', 'Amer-Indian-Eskimo', 'Other'])
+data.iloc[:,7]=lb_race.transform(data.iloc[:,7])
+
+lb_sex = preprocessing.LabelEncoder()
+lb_sex.fit(['Male','Female'])
+data.iloc[:,8]=lb_sex.transform(data.iloc[:,8])
+
+data.head()
+
+X=data.iloc[:,:-1]
+y=data[['income']]
+print(X)
+
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=4)
+
+print("train set: ", X_train.shape, y_train.shape)
+print("test set: ", X_test.shape, y_test.shape)
+
+from sklearn.neighbors import KNeighborsClassifier
+
+from sklearn import metrics
+
+for i in range(1,11):
+    neigh=KNeighborsClassifier(n_neighbors=i).fit(X_train,np.ravel(y_train))
+    #n_neighbors=i - количество используемых соседей (от 1 до 11)
+    #method fit - накладывает классифаер на датасет
+    #X_train - данные
+    #np.ravel(y_train) - значения которые должны получиться
+    #ravel - распрямляет массив
+    y_pred=neigh.predict(X_test) #предсказывает класс
+    acc=metrics.accuracy_score(y_test,y_pred) 
+    print(i,acc)
+    
+    
+import tkinter as tk
+from tkinter import *
+root=Tk()
+root.geometry("500x700")
+root.configure(background="white smoke")
+
+Label(root,text = "Income classifier", font=('Helvetica',16,'bold'), bg="LightCyan3",relief='solid',width=15).place(x=165,y=10)
+
+Label(root,text = "Возраст", font=('Helvetica',11,'bold'), bg="white smoke").place(x=50,y=90)
+Label(root,text = "Вид работы", font=('Helvetica',11,'bold'), bg="white smoke").place(x=50,y=140)
+Label(root,text = "Образование", font=('Helvetica',11,'bold'), bg="white smoke").place(x=50,y=190)
+Label(root,text = "Семейное положение", font=('Helvetica',11,'bold'), bg="white smoke").place(x=50,y=240)
+Label(root,text = "Профессия", font=('Helvetica',11,'bold'), bg="white smoke").place(x=50,y=290)
+Label(root,text = "Отношения", font=('Helvetica',11,'bold'), bg="white smoke").place(x=50,y=340)
+Label(root,text = "Раса", font=('Helvetica',11,'bold'), bg="white smoke").place(x=50,y=390)
+Label(root,text = "Пол", font=('Helvetica',11,'bold'), bg="white smoke").place(x=50,y=440)
+Label(root,text = "Количество часов в неделю", font=('Helvetica',11,'bold'), bg="white smoke").place(x=50,y=490)
+
+Label(root,text = "Результат: ", font=('Helvetica',11,'bold'), bg="white smoke",relief='solid',width=10).place(x=50,y=590)
+
+age=StringVar()
+wcl=StringVar()
+wcl.set(wcl_titles[0])
+educ=StringVar()
+educ.set(educ_titles[0])
+mst=StringVar()
+mst.set(mst_titles[0])
+occ=StringVar()
+occ.set(occ_titles[0])
+rel=StringVar()
+rel.set(rel_titles[0])
+race=StringVar()
+race.set(race_titles[0])
+sex=StringVar()
+sex.set(sex_titles[0])
+hpw=StringVar()
+Entry(root,text=age,width=10).place(x=150,y=90)
+OptionMenu(root,wcl,*wcl_titles).place(x=150,y=140)
+OptionMenu(root,educ,*educ_titles).place(x=160,y=190)
+OptionMenu(root,mst,*mst_titles).place(x=220,y=240)
+OptionMenu(root,occ,*occ_titles).place(x=150,y=290)
+OptionMenu(root,rel,*rel_titles).place(x=150,y=340)
+OptionMenu(root,race,*race_titles).place(x=150,y=390)
+OptionMenu(root,sex,*sex_titles).place(x=150,y=440)
+Entry(root,text=hpw,width=10).place(x=270,y=490)
+
+Label(root,text = "Информация", font=('Helvetica',11,'bold'), bg="white smoke",width=10).place(x=50,y=540)
+
+def info():
+    n=Tk()
+    n.geometry=('400x400')
+    n.configure(background='white smoke')
+    
+    n.resizable(0,0)
+    n.mainloop()
+
+Button(root,text='Информация',width=20,command=info).place(x=210,y=540)
+
+def model():
+    pass
+
+Button(root,text='Результат',width=20,command=model()).place(x=50,y=660)
+
+Button(root,text='Выход',width=20,command=root.destroy).place(x=210,y=660)
+
+root.resizable(0,0)
+root.mainloop()
